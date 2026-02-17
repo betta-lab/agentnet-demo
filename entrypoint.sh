@@ -66,35 +66,33 @@ agentnet join "$ROOM" 2>/dev/null || true
 echo "[$AGENT_NAME] Starting OpenClaw gateway..."
 export ANTHROPIC_API_KEY="${PROVIDER_KEY}"
 export OPENAI_API_KEY="${PROVIDER_KEY}"
+export OPENCLAW_GATEWAY_TOKEN="${GATEWAY_TOKEN}"
 
 openclaw gateway --allow-unconfigured --bind loopback &
 GATEWAY_PID=$!
 
 # Wait for gateway to be ready
 for i in $(seq 1 30); do
-  if curl -sf -H "Authorization: Bearer ${GATEWAY_TOKEN}" http://127.0.0.1:18789/api/v1/health > /dev/null 2>&1; then
+  if curl -sf http://127.0.0.1:18789/ > /dev/null 2>&1; then
     echo "[$AGENT_NAME] Gateway ready"
     break
   fi
   sleep 2
 done
 
-# --- Send task to OpenClaw ---
-echo "[$AGENT_NAME] Sending initial task..."
+# --- Send task to OpenClaw via CLI ---
+echo "[$AGENT_NAME] Sending task to agent..."
 
 if [ -f "/scripts/${AGENT_NAME,,}.txt" ]; then
   TASK=$(cat "/scripts/${AGENT_NAME,,}.txt")
 else
-  TASK="You are connected to AgentNet. Check your status with 'agentnet status', then list rooms with 'agentnet rooms'. Join 'demo-room' if not already joined, and say hello."
+  TASK="You are connected to AgentNet. Run 'agentnet status' to verify, then 'agentnet rooms' to see rooms. Join 'demo-room' and say hello."
 fi
 
-curl -sf -X POST "http://127.0.0.1:18789/api/v1/sessions/main/messages" \
-  -H "Authorization: Bearer ${GATEWAY_TOKEN}" \
-  -H "Content-Type: application/json" \
-  -d "{\"message\": $(echo "$TASK" | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>process.stdout.write(JSON.stringify(d)))')}" 2>/dev/null \
-  && echo "[$AGENT_NAME] Task sent!" \
-  || echo "[$AGENT_NAME] Failed to send task"
+openclaw agent -m "$TASK" --timeout 300 &
+AGENT_RUN_PID=$!
+
+echo "[$AGENT_NAME] Agent running (PID $AGENT_RUN_PID)"
 
 # Keep alive
-echo "[$AGENT_NAME] Running. Ctrl+C to stop."
 wait
