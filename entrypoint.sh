@@ -7,6 +7,7 @@ ROOM="${AGENTNET_ROOM:-demo-room}"
 ROOM_TOPIC="${AGENTNET_ROOM_TOPIC:-AgentNet Demo}"
 PROVIDER_KEY="${OPENCLAW_PROVIDER_KEY:-}"
 OPENCLAW_MODEL="${OPENCLAW_MODEL:-anthropic/claude-sonnet-4-20250514}"
+GATEWAY_TOKEN="demo-token-${AGENT_NAME}"
 
 # --- Write OpenClaw config ---
 mkdir -p /root/.openclaw
@@ -15,7 +16,9 @@ cat > /root/.openclaw/openclaw.json << CONF
 {
   "gateway": {
     "mode": "local",
-    "token": "demo-token-${AGENT_NAME}"
+    "auth": {
+      "token": "${GATEWAY_TOKEN}"
+    }
   },
   "agents": {
     "defaults": {
@@ -59,15 +62,22 @@ echo "[$AGENT_NAME] Joining room: $ROOM"
 agentnet create "$ROOM" "$ROOM_TOPIC" 2>/dev/null || true
 agentnet join "$ROOM" 2>/dev/null || true
 
-# --- Start OpenClaw gateway ---
+# --- Start OpenClaw gateway directly (no systemctl) ---
 echo "[$AGENT_NAME] Starting OpenClaw gateway..."
 export ANTHROPIC_API_KEY="${PROVIDER_KEY}"
 export OPENAI_API_KEY="${PROVIDER_KEY}"
 
-openclaw gateway start --allow-unconfigured &
+openclaw gateway --allow-unconfigured --bind loopback &
 GATEWAY_PID=$!
 
-sleep 5
+# Wait for gateway to be ready
+for i in $(seq 1 30); do
+  if curl -sf -H "Authorization: Bearer ${GATEWAY_TOKEN}" http://127.0.0.1:18789/api/v1/health > /dev/null 2>&1; then
+    echo "[$AGENT_NAME] Gateway ready"
+    break
+  fi
+  sleep 2
+done
 
 # --- Send task to OpenClaw ---
 echo "[$AGENT_NAME] Sending initial task..."
@@ -75,14 +85,15 @@ echo "[$AGENT_NAME] Sending initial task..."
 if [ -f "/scripts/${AGENT_NAME,,}.txt" ]; then
   TASK=$(cat "/scripts/${AGENT_NAME,,}.txt")
 else
-  TASK="You are connected to AgentNet. Check your status with 'agentnet status', then list rooms with 'agentnet rooms'. Join 'demo-room' if not already joined, and say hello. Then check for messages every 10 seconds and respond to anything interesting."
+  TASK="You are connected to AgentNet. Check your status with 'agentnet status', then list rooms with 'agentnet rooms'. Join 'demo-room' if not already joined, and say hello."
 fi
 
-# Send via gateway API
 curl -sf -X POST "http://127.0.0.1:18789/api/v1/sessions/main/messages" \
-  -H "Authorization: Bearer demo-token-${AGENT_NAME}" \
+  -H "Authorization: Bearer ${GATEWAY_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d "{\"message\": \"$TASK\"}" 2>/dev/null || echo "[$AGENT_NAME] Waiting for gateway..."
+  -d "{\"message\": $(echo "$TASK" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}" 2>/dev/null \
+  && echo "[$AGENT_NAME] Task sent!" \
+  || echo "[$AGENT_NAME] Failed to send task"
 
 # Keep alive
 echo "[$AGENT_NAME] Running. Ctrl+C to stop."
