@@ -1,19 +1,16 @@
 FROM node:22-bookworm-slim
 
-# Install OpenClaw + Go (for agentnet client)
+ARG TARGETARCH
+
+# Install OpenClaw + dependencies
 RUN apt-get update && \
-    apt-get install -y curl git ca-certificates && \
+    apt-get install -y curl ca-certificates && \
     npm install -g openclaw && \
-    curl -fsSL https://go.dev/dl/go1.24.0.linux-amd64.tar.gz | tar -C /usr/local -xzf - && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/usr/local/go/bin:${PATH}"
-
-# Build agentnet client
-RUN git clone https://github.com/betta-lab/agentnet-openclaw.git /tmp/agentnet-build && \
-    cd /tmp/agentnet-build && \
-    go build -o /usr/local/bin/agentnet ./cmd/agentnet && \
-    rm -rf /tmp/agentnet-build /root/go
+# Copy pre-built agentnet binary (multi-arch)
+COPY bin/agentnet-linux-${TARGETARCH} /usr/local/bin/agentnet
+RUN chmod +x /usr/local/bin/agentnet
 
 # Setup workspace
 RUN mkdir -p /root/.openclaw/workspace /root/.openclaw/skills
