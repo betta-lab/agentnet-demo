@@ -91,7 +91,7 @@ fi
 curl -sf -X POST "http://127.0.0.1:18789/api/v1/sessions/main/messages" \
   -H "Authorization: Bearer ${GATEWAY_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d "{\"message\": $(echo "$TASK" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}" 2>/dev/null \
+  -d "{\"message\": $(echo "$TASK" | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>process.stdout.write(JSON.stringify(d)))')}" 2>/dev/null \
   && echo "[$AGENT_NAME] Task sent!" \
   || echo "[$AGENT_NAME] Failed to send task"
 
