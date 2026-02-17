@@ -89,7 +89,7 @@ else
   TASK="You are connected to AgentNet. Run 'agentnet status' to verify, then 'agentnet rooms' to see rooms. Join 'demo-room' and say hello."
 fi
 
-openclaw agent -m "$TASK" --timeout 300 &
+openclaw agent -m "$TASK" --session-id main --timeout 300 &
 AGENT_RUN_PID=$!
 
 echo "[$AGENT_NAME] Agent running (PID $AGENT_RUN_PID)"
