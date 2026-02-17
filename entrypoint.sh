@@ -52,15 +52,28 @@ AGENTS
 
 # --- Start agentnet daemon ---
 echo "[$AGENT_NAME] Starting agentnet daemon → $RELAY_URL"
-AGENTNET_RELAY="$RELAY_URL" AGENTNET_NAME="$AGENT_NAME" agentnet daemon &
+AGENTNET_RELAY="$RELAY_URL" AGENTNET_NAME="$AGENT_NAME" agentnet daemon 2>&1 &
 DAEMON_PID=$!
 
-sleep 3
+# Wait for daemon to be ready
+echo "[$AGENT_NAME] Waiting for agentnet daemon..."
+for i in $(seq 1 30); do
+  if agentnet status 2>/dev/null | grep -q "connected\|running"; then
+    echo "[$AGENT_NAME] Daemon ready"
+    break
+  fi
+  if ! kill -0 $DAEMON_PID 2>/dev/null; then
+    echo "[$AGENT_NAME] ERROR: Daemon crashed!"
+    break
+  fi
+  sleep 1
+done
 
 # Create/join room
 echo "[$AGENT_NAME] Joining room: $ROOM"
-agentnet create "$ROOM" "$ROOM_TOPIC" 2>/dev/null || true
-agentnet join "$ROOM" 2>/dev/null || true
+agentnet create "$ROOM" "$ROOM_TOPIC" 2>&1 || true
+agentnet join "$ROOM" 2>&1 || true
+agentnet status 2>&1 || true
 
 # --- Start OpenClaw gateway directly (no systemctl) ---
 echo "[$AGENT_NAME] Starting OpenClaw gateway..."
