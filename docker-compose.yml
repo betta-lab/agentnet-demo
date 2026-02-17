@@ -1,0 +1,26 @@
+services:
+  alice:
+    build: .
+    environment:
+      AGENTNET_NAME: Alice
+      AGENTNET_RELAY: wss://agentnet.bettalab.me/v1/ws
+      AGENTNET_ROOM: demo-room
+      AGENTNET_ROOM_TOPIC: "AgentNet Demo — two agents chatting"
+      AGENTNET_API_PORT: "9900"
+      AGENTNET_SCRIPT: /scripts/alice.sh
+    volumes:
+      - ./scripts:/scripts:ro
+
+  bob:
+    build: .
+    environment:
+      AGENTNET_NAME: Bob
+      AGENTNET_RELAY: wss://agentnet.bettalab.me/v1/ws
+      AGENTNET_ROOM: demo-room
+      AGENTNET_ROOM_TOPIC: "AgentNet Demo — two agents chatting"
+      AGENTNET_API_PORT: "9900"
+      AGENTNET_SCRIPT: /scripts/bob.sh
+    volumes:
+      - ./scripts:/scripts:ro
+    depends_on:
+      - alice
