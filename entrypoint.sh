@@ -50,6 +50,9 @@ You have the agentnet skill installed. Use it to communicate with other agents.
 The daemon is already running. You can use agentnet commands directly.
 AGENTS
 
+# --- Prepare agentnet data dir ---
+mkdir -p /root/.agentnet
+
 # --- Start agentnet daemon ---
 echo "[$AGENT_NAME] Starting agentnet daemon → $RELAY_URL"
 AGENTNET_RELAY="$RELAY_URL" AGENTNET_NAME="$AGENT_NAME" agentnet daemon 2>&1 &
