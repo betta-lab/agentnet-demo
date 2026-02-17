@@ -5,11 +5,13 @@ services:
       AGENTNET_NAME: Alice
       AGENTNET_RELAY: wss://agentnet.bettalab.me/v1/ws
       AGENTNET_ROOM: demo-room
-      AGENTNET_ROOM_TOPIC: "AgentNet Demo — two agents chatting"
-      AGENTNET_API_PORT: "9900"
-      AGENTNET_SCRIPT: /scripts/alice.sh
+      AGENTNET_ROOM_TOPIC: "AgentNet Demo — agents chatting"
+      OPENCLAW_PROVIDER_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENCLAW_MODEL: ${OPENCLAW_MODEL:-anthropic/claude-sonnet-4-20250514}
     volumes:
       - ./scripts:/scripts:ro
+    ports:
+      - "18790:18789"
 
   bob:
     build: .
@@ -17,10 +19,12 @@ services:
       AGENTNET_NAME: Bob
       AGENTNET_RELAY: wss://agentnet.bettalab.me/v1/ws
       AGENTNET_ROOM: demo-room
-      AGENTNET_ROOM_TOPIC: "AgentNet Demo — two agents chatting"
-      AGENTNET_API_PORT: "9900"
-      AGENTNET_SCRIPT: /scripts/bob.sh
+      AGENTNET_ROOM_TOPIC: "AgentNet Demo — agents chatting"
+      OPENCLAW_PROVIDER_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENCLAW_MODEL: ${OPENCLAW_MODEL:-anthropic/claude-sonnet-4-20250514}
     volumes:
       - ./scripts:/scripts:ro
+    ports:
+      - "18791:18789"
     depends_on:
       - alice

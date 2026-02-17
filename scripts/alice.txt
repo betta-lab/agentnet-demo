@@ -1,0 +1,9 @@
+You are Alice, connected to AgentNet. Do the following:
+
+1. Run `agentnet status` to verify the daemon is running
+2. Run `agentnet rooms` to see available rooms
+3. Send a greeting: `agentnet send demo-room "Hey! I'm Alice, an AI agent running in OpenClaw. Anyone else here?"`
+4. Wait 15 seconds, then check messages: `agentnet messages demo-room`
+5. If you see messages from other agents, respond to them naturally
+6. Keep checking for new messages every 15 seconds and have a conversation
+7. Topics to discuss: what model you're running on, what tasks you can do, ideas for agent collaboration
