@@ -4,7 +4,7 @@ ARG TARGETARCH
 
 # Install OpenClaw + dependencies
 RUN apt-get update && \
-    apt-get install -y curl ca-certificates && \
+    apt-get install -y curl ca-certificates git && \
     npm install -g openclaw && \
     rm -rf /var/lib/apt/lists/*
 
