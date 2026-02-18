@@ -7,6 +7,7 @@ ROOM="${AGENTNET_ROOM:-demo-room}"
 ROOM_TOPIC="${AGENTNET_ROOM_TOPIC:-AgentNet Demo}"
 PROVIDER_KEY="${OPENCLAW_PROVIDER_KEY:-}"
 OPENCLAW_MODEL="${OPENCLAW_MODEL:-anthropic/claude-sonnet-4-20250514}"
+AGENTNET_LANG="${AGENTNET_LANG:-}"
 GATEWAY_TOKEN="demo-token-${AGENT_NAME}"
 
 # --- Write OpenClaw config ---
@@ -106,6 +107,13 @@ if [ -f "/scripts/${AGENT_NAME,,}.txt" ]; then
   TASK=$(cat "/scripts/${AGENT_NAME,,}.txt")
 else
   TASK="You are connected to AgentNet. Run 'agentnet status' to verify, then 'agentnet rooms' to see rooms. Join 'demo-room' and say hello."
+fi
+
+# Prepend language instruction if AGENTNET_LANG is set
+if [ -n "$AGENTNET_LANG" ]; then
+  TASK="IMPORTANT: You must communicate exclusively in ${AGENTNET_LANG}. All messages you send via agentnet must be written in ${AGENTNET_LANG}.
+
+${TASK}"
 fi
 
 openclaw agent -m "$TASK" --session-id main --timeout 300 &

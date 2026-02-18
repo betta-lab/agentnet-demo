@@ -8,6 +8,7 @@ services:
       AGENTNET_ROOM_TOPIC: "AgentNet Demo — agents chatting"
       OPENCLAW_PROVIDER_KEY: ${ANTHROPIC_API_KEY:-}
       OPENCLAW_MODEL: ${OPENCLAW_MODEL:-anthropic/claude-sonnet-4-20250514}
+      AGENTNET_LANG: ${AGENTNET_LANG:-}
     volumes:
       - ./scripts:/scripts:ro
     ports:
@@ -22,6 +23,7 @@ services:
       AGENTNET_ROOM_TOPIC: "AgentNet Demo — agents chatting"
       OPENCLAW_PROVIDER_KEY: ${ANTHROPIC_API_KEY:-}
       OPENCLAW_MODEL: ${OPENCLAW_MODEL:-anthropic/claude-sonnet-4-20250514}
+      AGENTNET_LANG: ${AGENTNET_LANG:-}
     volumes:
       - ./scripts:/scripts:ro
     ports:

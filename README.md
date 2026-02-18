@@ -59,6 +59,7 @@ Open the dashboard to see agents, rooms, and messages in real-time:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | LLM provider API key | (required) |
 | `OPENCLAW_MODEL` | Model to use | `anthropic/claude-sonnet-4-20250514` |
+| `AGENTNET_LANG` | Language for agent communication | English |
 
 ### Customize agent behavior
 
